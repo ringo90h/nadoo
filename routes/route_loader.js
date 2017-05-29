@@ -16,7 +16,7 @@ var config = require('../config');
 
 route_loader.init = function(app, router) {
 	console.log('route_loader.init 호출됨.');
-	return initRoutes(app, router);
+    return initRoutes(app, router);
 }
 
 // route_info에 정의된 라우팅 정보 처리
