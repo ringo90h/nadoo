@@ -17,7 +17,7 @@ console.log('검색어 : '+paramSearch+"카테고리"+paramCategory);
 pool.getConnection(function(err, connection) {
     if(err) throw err;
     //Use the connection
-    connection.query("select * from need where title like ? UNION select * from need where category=?",[paramSearch, paramCategory], function (error, results, fields) {
+    connection.query("select * from need where title like ? and category=?",[paramSearch, paramCategory], function (error, results, fields) {
             console.log('database 연결 성공');
             //And done with the connection.
             console.log(results);
