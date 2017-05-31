@@ -18,10 +18,14 @@ module.exports = {
 	// ],
 	route_info: [
 	    //===== User =====//
-	    {file:'./item', path:'/process/item', method:'itemGet', type:'get'},
+        {file:'./item', path:'/process/item', method:'itemGet', type:'get'},
+        //{file:'./item', path:'/process/item/:itemId', method:'itemGetId', type:'get'},
 	    {file:'./item', path:'/process/item', method:'itemPost', type:'post'},
-	    {file:'./need', path:'/process/need', method:'needGet', type:'get'},
-	    {file:'./need', path:'/process/need', method:'needPost', type:'post'},
+        {file:'./need', path:'/process/need', method:'needGet', type:'get'},
+        {file:'./need', path:'/process/need', method:'needPost', type:'post'},
+        {file:'./need', path:'/process/need/:needId', method:'needGetId', type:'get'},
+        {file:'./need', path:'/process/need/:needId', method:'needPut', type:'put'},
+        {file:'./need', path:'/process/need/:needId', method:'needDelete', type:'delete'}
 	    // {file:'./user', path:'/process/board', method:'boardGet', type:'get'},
 	    // {file:'./user', path:'/process/board', method:'boardPost', type:'post'},
 	    // {file:'./user', path:'/process/chat', method:'chatGet', type:'get'},
