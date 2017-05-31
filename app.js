@@ -48,10 +48,10 @@ app.set('port', process.env.PORT || 3000);
  
 
 // body-parser를 이용해 application/x-www-form-urlencoded 파싱
-app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.urlencoded({ extended: false }));
 
 // body-parser를 이용해 application/json 파싱
-app.use(bodyParser.json())
+app.use(bodyParser.json());
 
 // public 폴더를 static으로 오픈
 app.use('/public', static(path.join(__dirname, 'public')));
@@ -100,11 +100,12 @@ process.on('SIGTERM', function () {
     app.close();
 });
 
+
 app.on('close', function () {
 	console.log("Express 서버 객체가 종료됩니다.");
-	if (database.db) {
-		database.db.close();
-	}
+	//if (database.db) {
+	//	database.db.close();
+	//}
 });
 
 // 시작된 서버 객체를 리턴받도록 합니다. // Express 서버 시작
@@ -112,5 +113,5 @@ var server = http.createServer(app).listen(app.get('port'), function(){
 	console.log('서버가 시작되었습니다. 포트 : ' + app.get('port'));
 
     // 데이터베이스 초기화
-    database.init(app, config);
+    //database.init(app, config);
 });
