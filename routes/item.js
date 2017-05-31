@@ -41,8 +41,10 @@ var itemGet = function(req, res){
 	//res.write('<h1>쿼리 정보  = search : '+ paramSearch + ', category : ' + paramCategory + ', minprice : ' + paramMinPrice + ', maxprice : ' + paramMaxPrice + ', sort :' + paramSort + '</h1>');
 	//res.end();
 }
-
+var itemGet = function(req, res){}
+var itemGetId = function(req, res){}
 var itemPost = function(req, res){}
 
 module.exports.itemGet = itemGet;
+module.exports.itemGetId = itemGetId;
 module.exports.itemPost = itemPost;
