@@ -11,7 +11,10 @@ module.exports = {
     user     : 'nadooroot',
     password : '1234nadoo1234',
     database : 'nadoodata',
-	server_port: 3000
+	server_port: 3000,
+    region:'Asia Pacific',
+    accessKeyId:'AKIAIAVTEHBYC7R5CJ7A',
+    secretAccessKey:'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'
 	// db_url: 'mongodb://localhost:27017/local',
 	// db_schemas: [
 	//     {file:'./user_schema', collection:'users3', schemaName:'UserSchema', modelName:'UserModel'}
