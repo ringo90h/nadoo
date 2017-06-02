@@ -12,9 +12,10 @@ Need.needGet = (req, cb) => {
     console.log('검색어 : '+paramSearch+"카테고리"+paramCategory);
     //query, params, body
 
-    var sql = "select * from need where";
-    if(paramSearch){paramSearch = " title like '%"+paramSearch+"%'"; sql = sql.concat(paramSearch);}
+    var sql = "select * from need";
+    if(paramSearch){paramSearch = " where title like '%"+paramSearch+"%'"; sql = sql.concat(paramSearch);}
     if(paramCategory){paramCategory = ' and category="'+paramCategory+'"'; sql = sql.concat(paramCategory);}
+console.log(sql);
 
     pool.getConnection(function(err, conn){
         if(err){return cb(err);}
