@@ -126,7 +126,7 @@ Item.itemPut = (req, cb)=>{
 }
 
 Item.itemDelete = (req, cb)=>{
-    console.log('itemPost 메소드 호출됨');
+    console.log('itemDelete 메소드 호출됨');
     var paramUserId = req.body.user_id;
     //세션에서 얻어오기
     var paramitemId = req.params.itemId;
