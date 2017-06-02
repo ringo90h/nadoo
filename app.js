@@ -1,3 +1,4 @@
+/*jshint esversion: 6 */
 /**
  * 모듈화된 Default 프로젝트
  * 
@@ -28,17 +29,11 @@ var mongoose = require('mongoose');
 
 // Session 미들웨어 불러오기
 var expressSession = require('express-session');
-  
-// 모듈로 분리한 설정 파일 불러오기
+
 var config = require('./config');
-
-//모듈로 분리한 데이터베이스 파일 불러오기
 var database = require('./database/database');
+var router = require('./routes/router');
 
-// 모듈로 분리한 라우팅 파일 불러오기
-var route_loader = require('./routes/route_loader');
-
-// 익스프레스 객체 생성
 var app = express();
 
 
@@ -66,9 +61,7 @@ app.use(expressSession({
 	saveUninitialized:true
 }));
 
- 
-//라우팅 정보를 읽어들여 라우팅 설정
-route_loader.init(app, express.Router());
+app.use(router);
 
 
 
@@ -93,18 +86,21 @@ process.on('uncaughtException', function (err) {
 	console.log(err.stack);
 });
 
-// 프로세스 종료 시에 데이터베이스 연결 해제
-process.on('SIGTERM', function () {
-    console.log("프로세스가 종료됩니다.");
-    app.close();
-});
-
-
 app.on('close', function () {
 	console.log("Express 서버 객체가 종료됩니다.");
 	//if (database.db) {
 	//	database.db.close();
 	//}
+});
+
+
+//여기까지 오면 -에러
+app.use(function(req, res, next){
+	res.sendStatus(404);
+});
+
+app.use(function(err, req, res, next){
+	res.status(500).send({mag: err.message});
 });
 
 // 시작된 서버 객체를 리턴받도록 합니다. // Express 서버 시작
