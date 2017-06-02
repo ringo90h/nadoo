@@ -2,7 +2,7 @@
 const async = require('async');
 const fs = require('fs');
 const assert = require('assert');
-const easyimg = require('easyimage');
+//const easyimg = require('easyimage');
 const multer = require('multer');
 const pathUtil = require('path');
 const express = require('express');
@@ -74,7 +74,7 @@ awsimage.uploadImage = async function(req, res){
 
         // 쎔네일 올리기
         const thumbnailKey = 'thumbnail/' + fileName;
-        const thumbnailUploadResult = await uploadToS3(thumbnailKey, thumbnailPath, fileInfo
+        const thumbnailUploadResult = await awsimage.uploadToS3(thumbnailKey, thumbnailPath, fileInfo
             .mimetype);
 
         // 썸네일 정보 데이터베이스 저장
@@ -97,7 +97,7 @@ awsimage.uploadImage = async function(req, res){
 }
 
 // 이미지를 S3로 업로드
-function uploadToS3(itemKey, path, mimetype) {
+awsimage.uploadToS3 = function(itemKey, path, mimetype) {
     return new Promise( (resolve, reject) => {
         const params = {
             Bucket: bucketName,  // 필수
