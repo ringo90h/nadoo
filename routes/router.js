@@ -19,7 +19,7 @@ var router = express.Router();
 //router.route('/item/:itemId').get(itemGetId).delete(itemDelete).put(itemPut);
 router.route('/need').get(needGet).post(needPost);
 router.route('/need/:needId').get(needGetId).delete(needDelete).put(needPut);
-router.route('/imagetest').post(upload.single('image'),uploadImage);
+router.route('/imagetest').post(uploadImage);
 
 function needGet(req, res, next){Index.needGet(req,res,next);}
 function needPost(req, res, next){Index.needPost(req,res,next);}
