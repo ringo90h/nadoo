@@ -12,7 +12,7 @@ module.exports = {
     password : '1234nadoo1234',
     database : 'nadoodata',
 	server_port: 3000,
-    region:'Asia Pacific',
+    region:'ap-northeast-2',
     bucketName : 'nadoobucket',
     accessKeyId:'AKIAIAVTEHBYC7R5CJ7A',
     secretAccessKey:'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'

@@ -1,6 +1,6 @@
 /*jshint esversion: 6 */
 
-var pool = require('./dbConnect');
+var pool = require('../database/dbConnect');
 class board{
 }
 

@@ -1,6 +1,6 @@
 /*jshint esversion: 6 */
 
-var pool = require('./dbConnect');
+var pool = require('../database/dbConnect');
 class Item{
 }
 
@@ -71,21 +71,25 @@ Item.itemPost = (req, cb)=>{
     var paramTitle = req.body.title;
     var paramCategory = req.body.category;
     var paramArticle = req.body.article;
+    var paramPriceKind = req.body.priceKind;
+    var paramPrice = req.body.price;
     var paramSchoolLocation = req.body.location;
     var paramChecking = req.body.checking;
     var date = new Date();
 
+    console.log(req.headers['content-type']);
+    console.log(req.files);
+
     pool.getConnection(function(err, conn) {
         if(err){return cb(err);}
         //Use the connection
-        conn.query("insert into item values('',?,?,?,?,?,?,?)",
-            [paramUserId, paramTitle, paramCategory, paramArticle, date, paramSchoolLocation, paramChecking], function (error, results) {
+        conn.query("insert into item values('',?,?,?,?,?,?,'',?,?,?,'3')",
+            [paramUserId, paramTitle, paramCategory, paramArticle, paramPriceKind, paramPrice, date, paramSchoolLocation, paramChecking], function (error, results) {
                 console.log('쿼리문 전송 성공');
                 //And done with the connection.
                 if (err) {return cb(err);}
-                results.message = "post success";
                 conn.release();
-                return cb(null,{mag :results.message, insertId: results.insertId, affectedRows: results.affectedRows});
+                return cb(null,{mag :'성공'});
             });
     });
 }
