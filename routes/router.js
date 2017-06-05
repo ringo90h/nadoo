@@ -9,23 +9,23 @@
  */
 
 const express = require('express');
-const multer = require('multer');
 const Index = require('../model/index');
-const upload = multer({dest:'uploads/'});
+const multer = require('multer');
+const upload = multer({dest : '../model/image'});
 
 var router = express.Router();
 
-//router.route('/item').get(itemGet).post(itemPost);
+router.route('/item').get(itemGet).post(upload.array('image'),itemPost);
 //router.route('/item/:itemId').get(itemGetId).delete(itemDelete).put(itemPut);
 router.route('/need').get(needGet).post(needPost);
 router.route('/need/:needId').get(needGetId).delete(needDelete).put(needPut);
-router.route('/imagetest').post(uploadImage);
 
 function needGet(req, res, next){Index.needGet(req,res,next);}
 function needPost(req, res, next){Index.needPost(req,res,next);}
 function needGetId(req, res, next){Index.needGetId(req,res,next);}
 function needDelete(req, res, next){Index.needDelete(req,res,next);}
 function needPut(req, res, next){Index.needPut(req,res,next);}
-function uploadImage(req, res, next){Index.uploadImage(req,res,next);}
+function itemGet(req, res, next){Index.itemGet(req,res,next);}
+function itemPost(req, res, next){Index.itemPost(req,res,next);}
 
 module.exports = router;

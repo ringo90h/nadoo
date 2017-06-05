@@ -5,7 +5,7 @@
 
 const Need = require('./need');
 const Item = require('./item');
-const awsimage = require('./awsimage');
+const awsimage = require('./thumbnail');
 class Index{
 }
 
@@ -48,6 +48,7 @@ Index.needDelete = (req, res, next)=>{
         res.send(result);
     });
 }
+
 Index.itemGet = (req, res, next)=>{
     console.log('itemGet 라우팅');
     Item.itemGet(req,(err,result)=>{
@@ -74,7 +75,7 @@ Index.itemGetId = (req, res, next)=>{
 
 Index.itemPut = (req, res, next)=>{
     console.log('itemPut 라우팅');
-    Item.itemPut(req,(err,result)=>{
+    Item.itemPut(req.file,(err,result)=>{
         if(err){return next(err);}
         res.send(result);
     });
@@ -88,9 +89,9 @@ Index.itemDelete = (req, res, next)=>{
     });
 }
 
-Index.uploadImage = (req, res, next)=>{
+Index.uploadMulti = (req, res, next)=>{
     console.log('uploadImage 라우팅');
-    awsimage.uploadImage(req,(err,result)=>{
+    FileUploader.uploadMulti(req, (err,result)=>{
         if(err){return next(err);}
         res.send(result);
     });

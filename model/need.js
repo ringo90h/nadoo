@@ -1,6 +1,6 @@
 /*jshint esversion: 6 */
 
-var pool = require('./dbConnect');
+var pool = require('../database/dbConnect');
 class Need{
 }
 
@@ -14,8 +14,9 @@ Need.needGet = (req, cb) => {
 
     var sql = "select * from need";
     if(paramSearch){paramSearch = " where title like '%"+paramSearch+"%'"; sql = sql.concat(paramSearch);}
-    if(paramCategory){paramCategory = ' and category="'+paramCategory+'"'; sql = sql.concat(paramCategory);}
-console.log(sql);
+    if(paramSearch&&paramCategory){paramCategory = ' and category="'+paramCategory+'"'; sql = sql.concat(paramCategory);}
+    if(!paramSearch&&paramCategory){paramCategory = ' where category="'+paramCategory+'"'; sql = sql.concat(paramCategory);}
+    console.log(sql);
 
     pool.getConnection(function(err, conn){
         if(err){return cb(err);}
