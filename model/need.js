@@ -53,7 +53,6 @@ Need.needPost = (req, cb)=>{
             console.log('쿼리문 전송 성공');
             //And done with the connection.
             if (err) {return cb(err);}
-            console.dir(results);
             conn.release();
             return cb(null,{mag :"post success", insertId: results.insertId, affectedRows: results.affectedRows});
         });
