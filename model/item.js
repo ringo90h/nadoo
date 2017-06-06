@@ -1,6 +1,7 @@
 /*jshint esversion: 6 */
 
 var pool = require('../database/dbConnect');
+var awsImageUpload = require('./awsImageUpload');
 class Item{
 }
 
@@ -78,7 +79,11 @@ Item.itemPost = (req, cb)=>{
     var date = new Date();
 
     console.log(req.headers['content-type']);
-    console.log(req.files);
+    console.dir(req.files);
+    awsImageUpload.uploadMulti(req.files, (err, results)=>{
+        if(err){console.log(err);}
+        console.log(results);
+    });
 
     pool.getConnection(function(err, conn) {
         if(err){return cb(err);}

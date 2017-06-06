@@ -11,7 +11,23 @@
 const express = require('express');
 const Index = require('../model/index');
 const multer = require('multer');
-const upload = multer({dest : '../model/image'});
+const pathUtil = require('path');
+
+var storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, './model/image'); // cb 콜백함수를 통해 전송된 파일 저장 디렉토리 설정
+    },
+    filename: function (req, file, cb) {
+        const extname = pathUtil.extname(file.originalname); // 확장자
+        const now = new Date(); // 날짜를 이용한 파일 이름 생성
+        const randomKey = 'image_' + now.getHours() + now.getMinutes() + now.getSeconds() + Math.floor(Math.random()*1000) + extname;
+        console.log('랜덤키 생성 결과'+ randomKey);
+        cb(null, randomKey);
+        //cb(null, file.originalname); // cb 콜백함수를 통해 전송된 파일 이름 설정
+    }
+});
+
+const upload = multer({storage : storage});
 
 var router = express.Router();
 

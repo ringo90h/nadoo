@@ -42,14 +42,14 @@ Need.needPost = (req, cb)=>{
     var paramCategory = req.body.category;
     var paramArticle = req.body.article;
     var paramSchoolLocation = req.body.location;
-    var paramChecking = req.body.checking;
+
     var date = new Date();
 
     pool.getConnection(function(err, conn) {
         if(err){return cb(err);}
         //Use the connection
-        conn.query("insert into need values('',?,?,?,?,?,?,?)",
-            [paramUserId, paramTitle, paramCategory, paramArticle, date, paramSchoolLocation, paramChecking], function (error, results) {
+        conn.query("insert into need values('',?,?,?,?,?,?)",
+            [paramUserId, paramTitle, paramCategory, paramArticle, date, paramSchoolLocation], function (error, results) {
             console.log('쿼리문 전송 성공');
             //And done with the connection.
             if (err) {return cb(err);}

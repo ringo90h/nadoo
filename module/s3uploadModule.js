@@ -48,6 +48,7 @@ AWS.S3.prototype.uploadFile = function (filePath, contentType, itemKey, callback
         Body: fs.createReadStream(filePath),
         ContentType: contentType
     }
+    console.dir(params);
 
     this.putObject(params, function (err, data) {
         if (err) {
@@ -78,8 +79,8 @@ AWS.S3.prototype.uploadImage = function (fileInfo, uploadInfo, callback) {
 
     // 삭제할 파일 경로 저장
     var pathForDelete = [];
-    var filePathOriginal = fileInfo.filePath+'.jpg';
-
+    var filePathOriginal = './model/image/'
+    console.log('fileinfo.filePath : '+filePathOriginal);
     async.waterfall([
         // 원본 이미지 업로드
         (taskDone) => {
