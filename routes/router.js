@@ -35,13 +35,22 @@ router.route('/item').get(itemGet).post(upload.array('image'),itemPost);
 //router.route('/item/:itemId').get(itemGetId).delete(itemDelete).put(itemPut);
 router.route('/need').get(needGet).post(needPost);
 router.route('/need/:needId').get(needGetId).delete(needDelete).put(needPut);
+router.route('/board').get(boardGet).post(boardPost);
+router.route('/board/:boardId').get(boardGetId).delete(boardDelete).put(boardPut);
 
 function needGet(req, res, next){Index.needGet(req,res,next);}
 function needPost(req, res, next){Index.needPost(req,res,next);}
 function needGetId(req, res, next){Index.needGetId(req,res,next);}
 function needDelete(req, res, next){Index.needDelete(req,res,next);}
 function needPut(req, res, next){Index.needPut(req,res,next);}
+
 function itemGet(req, res, next){Index.itemGet(req,res,next);}
 function itemPost(req, res, next){Index.itemPost(req,res,next);}
+
+function boardGet(req, res, next){Index.boardGet(req,res,next);}
+function boardPost(req, res, next){Index.boardPost(req,res,next);}
+function boardGetId(req, res, next){Index.boardGetId(req,res,next);}
+function boardDelete(req, res, next){Index.boardDelete(req,res,next);}
+function boardPut(req, res, next){Index.boardPut(req,res,next);}
 
 module.exports = router;
