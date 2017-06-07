@@ -5,6 +5,7 @@
 
 const Need = require('./need');
 const Item = require('./item');
+const Board = require('./board');
 const awsimage = require('./thumbnail');
 class Index{
 }
@@ -44,6 +45,45 @@ Index.needPut = (req, res, next)=>{
 Index.needDelete = (req, res, next)=>{
     console.log('needDelete 라우팅');
     Need.needDelete(req,(err,result)=>{
+        if(err){return next(err);}
+        res.send(result);
+    });
+}
+Index.boardGet = (req, res, next)=>{
+    console.log('boardGet 라우팅');
+    Board.boardGet(req,(err,result)=>{
+        if(err){return next(err);}
+        res.send(result);
+    });
+}
+
+Index.boardPost = (req, res, next)=>{
+    console.log('boardPost 라우팅');
+    Board.boardPost(req,(err,result)=>{
+        if(err){return next(err);}
+        res.send(result);
+    });
+}
+
+Index.boardGetId = (req, res, next)=>{
+    console.log('boardGetId 라우팅');
+    Board.boardGetId(req,(err,result)=>{
+        if(err){return next(err);}
+        res.send(result);
+    });
+}
+
+Index.boardPut = (req, res, next)=>{
+    console.log('boardPut 라우팅');
+    Board.boardPut(req,(err,result)=>{
+        if(err){return next(err);}
+        res.send(result);
+    });
+}
+
+Index.boardDelete = (req, res, next)=>{
+    console.log('boardDelete 라우팅');
+    Board.boardDelete(req,(err,result)=>{
         if(err){return next(err);}
         res.send(result);
     });
