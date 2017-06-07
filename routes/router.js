@@ -36,7 +36,7 @@ router.route('/item').get(itemGet).post(upload.array('image'),itemPost);
 router.route('/need').get(needGet).post(needPost);
 router.route('/need/:needId').get(needGetId).delete(needDelete).put(needPut);
 router.route('/board').get(boardGet).post(boardPost);
-router.route('/board/:boardId').get(boardGetId).delete(boardDelete).put(boardPut);
+//router.route('/board/:boardId').get(boardGetId).delete(boardDelete).put(boardPut);
 
 function needGet(req, res, next){Index.needGet(req,res,next);}
 function needPost(req, res, next){Index.needPost(req,res,next);}
