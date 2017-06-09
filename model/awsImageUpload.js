@@ -9,11 +9,14 @@ class awsImageUpload{
 awsImageUpload.uploadMulti = (fileInfo, callback)=> {
     console.log('uploadmulti 함수 실행 ');
 
-    console.log('파일 0 경로:'+fileInfo[0].filename + fileInfo[0].mimetype);
-    const files = [
-        { filePath : fileInfo[0].filename, contentType : fileInfo[0].mimetype },
-        { filePath : fileInfo[1].filename, contentType : fileInfo[1].mimetype }
-    ];
+    console.log('파일 [0] 경로:'+fileInfo[0].filename +'파일 [0] 타입 :' + fileInfo[0].mimetype);
+
+    const files = [];
+    for(var i=0;i<fileInfo.length;i++){
+        files.push({filePath : fileInfo[i].filename, contentType : fileInfo[i].mimetype});
+    }
+    console.log('파일정보 : ');
+    console.dir(files);
 
     async.map(files, (file, callback) => {
         const itemKey = file.filePath;
@@ -21,15 +24,16 @@ awsImageUpload.uploadMulti = (fileInfo, callback)=> {
             itemKey : './model/image/' + itemKey,
             thumbnailKey : './model/thumbnail/' + itemKey
         };
-        console.log(itemKey);
-        console.dir(s3param);
-        s3Util.uploadImage(file, s3param, (err, result) => {
 
+        s3Util.uploadImage(file, s3param, (err, result) => {
             if ( err ) {
                 return callback(err);
             }
+            console.log('이미지 로컬 스토리지 업로드');
             callback(null, result);
         });
+
+
     }, (err, results) => {
         if ( err ) {
             console.log('Multifile image error:', err);

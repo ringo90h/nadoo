@@ -64,6 +64,7 @@ AWS.S3.prototype.uploadFile = function (filePath, contentType, itemKey, callback
 
 
 AWS.S3.prototype.uploadImage = function (fileInfo, uploadInfo, callback) {
+    console.log('uploadImage 메소드 실행');
     // filePath, contentType, itemKey
     if (!fileInfo.filePath || !uploadInfo || !callback) {
         assert(false, 'check parameter!');
