@@ -6,7 +6,9 @@
 const Need = require('./need');
 const Item = require('./item');
 const Board = require('./board');
+const User = require('./user');
 const awsimage = require('./thumbnail');
+
 class Index{
 }
 
@@ -129,9 +131,42 @@ Index.itemDelete = (req, res, next)=>{
     });
 }
 
-Index.uploadMulti = (req, res, next)=>{
-    console.log('uploadImage 라우팅');
-    FileUploader.uploadMulti(req, (err,result)=>{
+
+Index.userGet = (req, res, next)=>{
+    console.log('userGet 라우팅');
+    User.userGet(req,(err,result)=>{
+        if(err){return next(err);}
+        res.send(result);
+    });
+}
+
+Index.userPost = (req, res, next)=>{
+    console.log('userPost 라우팅');
+    User.userGet(req,(err,result)=>{
+        if(err){return next(err);}
+        res.send(result);
+    });
+}
+
+Index.userGetId = (req, res, next)=>{
+    console.log('userGetId 라우팅');
+    User.userGetId(req,(err,result)=>{
+        if(err){return next(err);}
+        res.send(result);
+    });
+}
+
+Index.userPut = (req, res, next)=>{
+    console.log('userPut 라우팅');
+    User.userPut(req.file,(err,result)=>{
+        if(err){return next(err);}
+        res.send(result);
+    });
+}
+
+Index.userDelete = (req, res, next)=>{
+    console.log('userDelete 라우팅');
+    User.userDelete(req,(err,result)=>{
         if(err){return next(err);}
         res.send(result);
     });
