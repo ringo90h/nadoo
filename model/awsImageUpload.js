@@ -6,42 +6,39 @@ const async = require('async');
 class awsImageUpload{
 }
 
+
+awsImageUpload.upload = async (files ,pool, cb)=>{
+    try {
+        let r1 = await awsImageUpload.uploadMulti(files, (err, resuslt)=>{
+            if(err){return cb(err,null)}
+            console.log(result);
+            return cb(null, result);
+        });
+        //result로 이미지 URL전달해줘야함
+    } catch (error) {
+        console.log('Task Failure', error);
+        throw error;
+    }
+}
+
 awsImageUpload.uploadMulti = (fileInfo, callback)=> {
     console.log('uploadmulti 함수 실행 ');
-
     console.log('파일 [0] 경로:'+fileInfo[0].filename +'파일 [0] 타입 :' + fileInfo[0].mimetype);
 
     const files = [];
     for(var i=0;i<fileInfo.length;i++){
         files.push({filePath : fileInfo[i].filename, contentType : fileInfo[i].mimetype});
-    }
-    console.log('파일정보 : ');
-    console.dir(files);
-
-    async.map(files, (file, callback) => {
-        const itemKey = file.filePath;
-        const s3param = {
-            itemKey : './model/image/' + itemKey,
-            thumbnailKey : './model/thumbnail/' + itemKey
+        var s3Param = {
+            itemKey: 'image/' + fileInfo[i].filename,
+            thumbnailKey: 'thumbnail/' + fileInfo[i].filename
         };
-
-        s3Util.uploadImage(file, s3param, (err, result) => {
-            if ( err ) {
-                return callback(err);
-            }
-            console.log('이미지 로컬 스토리지 업로드');
-            callback(null, result);
+        s3Util.uploadImage(fileInfo[i], s3Param, (err, result)=>{
+            if(err){return err;}
+            console.log('성공');
+            console.dir(result);
         });
+    }
 
-
-    }, (err, results) => {
-        if ( err ) {
-            console.log('Multifile image error:', err);
-        }
-        else {
-            console.log('Multifile image success :', results);
-        }
-    });
 }
 
 module.exports = awsImageUpload;

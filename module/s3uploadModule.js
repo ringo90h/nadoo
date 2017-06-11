@@ -3,7 +3,7 @@ const AWS = require('aws-sdk');
 const async = require('async');
 const fs = require('fs');
 const assert = require('assert');
-const thumb = require('node-thumbnail').thumb;
+const easyimg = require('easyimage');
 
 const config = require('../config.js');
 AWS.config.region = config.region;
@@ -16,27 +16,20 @@ const s3 = new AWS.S3();
 const bucketName = config.bucketName;
 const thumbnailPath = './thumbnail/';
 
-function createThumbnail(imagePath, thumbnailPath, callback) {
-    thumb({
-        source: imagePath, // could be a filename: dest/path/image.jpg
-        destination: thumbnailPath,
-        concurrency: 4,
-        prefix: '',
-        suffix: '_thumb',
-        digest: false,
-        hashingType: 'sha1', // 'sha1', 'md5', 'sha256', 'sha512'
-        width: 100,
-        quiet: false, // if set to 'true', console.log status messages will be supressed
-        overwrite: false,
-        basename: undefined, // basename of the thumbnail. If unset, the name of the source file is used as basename.
-        ignore: false, // Ignore unsupported files in "dest"
-        logger: function(message) {
-            console.log(message);
+function createThumbnail(imagePath, thumbnailPath) {
+    easyimg.rescrop({
+        src:imagePath, dst:thumbnailPath,
+        width:500, height:500,
+        cropwidth:128, cropheight:128,
+        x:0, y:0
+    }).then(
+        function(image) {
+            console.log('Resized and cropped: ' + image.width + ' x ' + image.height);
+        },
+        function (err) {
+            console.log(err);
         }
-    }, function(files, err, stdout, stderr) {
-        if(err){callback(err);}
-        console.log('All done!');
-    });
+    );
 }
 
 // 파일 업로드
@@ -48,9 +41,7 @@ AWS.S3.prototype.uploadFile = function (filePath, contentType, itemKey, callback
         Body: fs.createReadStream(filePath),
         ContentType: contentType
     }
-    console.dir(params);
-
-    this.putObject(params, function (err, data) {
+    this.putObject(params, function(err, data){
         if (err) {
             console.error('S3 PutObject Error', err);
             return callback(err);
@@ -64,9 +55,10 @@ AWS.S3.prototype.uploadFile = function (filePath, contentType, itemKey, callback
 
 
 AWS.S3.prototype.uploadImage = function (fileInfo, uploadInfo, callback) {
-    console.log('uploadImage 메소드 실행');
+    console.log('S3 uploadImage 메소드 실행');
+    console.dir(uploadInfo);
     // filePath, contentType, itemKey
-    if (!fileInfo.filePath || !uploadInfo || !callback) {
+    if (!fileInfo.path || !uploadInfo || !callback) {
         assert(false, 'check parameter!');
     }
 
@@ -82,18 +74,20 @@ AWS.S3.prototype.uploadImage = function (fileInfo, uploadInfo, callback) {
     var pathForDelete = [];
     var filePathOriginal = './model/image/'
     console.log('fileinfo.filePath : '+filePathOriginal);
+
     async.waterfall([
         // 원본 이미지 업로드
         (taskDone) => {
             //업로드할 파일패스, 콘텐츠, 업로드할이름
-            this.uploadFile(filePathOriginal, fileInfo.contentType, uploadInfo.itemKey, (err, result) => {
+            console.dir(fileInfo);
+            this.uploadFile(fileInfo.path, fileInfo.mimetype, uploadInfo.itemKey, (err, result) => {
                 if (err) {
                     console.error('S3 image fail :', err);
                     return taskDone(err);
                 }
                 // 삭제할 이미지 경로 저장
                 pathForDelete.push(filePathOriginal);
-                console.log('이미지 업로드 성공 :', result);
+                console.log('이미지 업로드 성공:', result);
                 // 결과용 객체에 이미지 경로 저장
                 uploadResult.imageUrl = result;
                 //todo: DB result에 저장하기
@@ -109,7 +103,10 @@ AWS.S3.prototype.uploadImage = function (fileInfo, uploadInfo, callback) {
 
             // 썸네일 경로
             //변경할이미지, 올릴이미지
-            createThumbnail(filePathOriginal, thumbnailPath, (err, result) => {
+            console.log('----------------')
+            console.dir(fileInfo);
+            console.dir(uploadInfo);
+            createThumbnail(uploadInfo.itemKey, uploadInfo.thumbnailKey, (err, result) => {
                 // 썸네일 생성 실패 - 원본 이미지 사용
                 if (err) {
                     console.log('thumbnail 생성 실패 :', err);
@@ -118,7 +115,7 @@ AWS.S3.prototype.uploadImage = function (fileInfo, uploadInfo, callback) {
                 }
 
                 // 썸네일 업로드
-                this.uploadFile(thumbnailPath, fileInfo.contentType, uploadInfo.thumbnailKey, (err, result) => {
+                this.uploadFile(fileInfo.path, fileInfo.contentType, uploadInfo.thumbnailKey, (err, result) => {
                     if (err) {
                         console.log('thumbanil 업로드 실패', err);
                         // 썸네일 업로드 실패하더라도 이미지 업로드를 중단하지 않는다. 원본 이미지를 썸네일로 사용.
@@ -127,7 +124,7 @@ AWS.S3.prototype.uploadImage = function (fileInfo, uploadInfo, callback) {
                     console.log('thumbnail 업로드 성공 :', result);
 
                     // 파일 삭제 태스크를 위한 경로 저장
-                    pathForDelete.push(thumbnailPath);
+                    pathForDelete.push(fileInfo.path);
 
                     // 결과용 객체에 이미지 경로 저장
                     uploadResult.thumbnailUrl = result;

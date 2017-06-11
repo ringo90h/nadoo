@@ -1,4 +1,5 @@
 /*jshint esversion: 6 */
+/*jshint -W030 */
 
 var pool = require('../database/dbConnect');
 var awsImageUpload = require('./awsImageUpload');
@@ -18,7 +19,7 @@ Item.itemGet = (req, cb) => {
     var paramStatus = req.query.status;
     var paramSort = req.query.sort;
 
-    var sql = "select * from item";
+    var sql = "select item.*,user.nickname,user.profile_thumbURL,user.check from item inner join user on item.user_id = user.user_key";
 
     var row_count = 10;
     var offset = (page - 1)*row_count ;
@@ -27,35 +28,58 @@ Item.itemGet = (req, cb) => {
     console.log('검색어 : '+paramSearch+" 카테고리 : "+paramCategory+" 최소금액 : "+paramMinPrice+" 최대금액 : "+paramMaxPrice+" " +
         "정렬기준 : "+paramSort+" 가격유형 : "+parampriceKind+"상태 : "+paramStatus);
     //query, params, body
-    if(page){
-        if(paramSearch&&!paramCategory){
-            sql = sql+" where title like '%"+paramSearch+"%'"+limitSql;
-            pool.getConnection(function(err, conn){
-                if(err){return cb(err);}
+    if(page) {
+        if (paramSearch && !paramCategory) {
+            sql = sql + " where title like '%" + paramSearch + "%'" + limitSql;
+            pool.getConnection(function (err, conn) {
+                if (err) {
+                    return cb(err);
+                }
 
                 conn.query(sql, function (err, results) {
                         console.log('쿼리문 전송 성공, 검색어 검색');
-                        if (err) {return cb(err);}
+                        if (err) {
+                            return cb(err);
+                        }
                         conn.release();
                         return cb(null, {page: page, count: results.length, data: results});
                     }
-
                 );
             });
-        }else if(!paramSearch&&paramCategory) {
-            limitSql = ' order by '+paramSort+' desc limit '+offset+','+row_count;
-            sql = sql+" where category=? and priceKind=? and price between ? and ? and status=?"+limitSql;
+        } else if (!paramSearch && paramCategory) {
+            limitSql = ' order by ' + paramSort + ' desc limit ' + offset + ',' + row_count;
+            sql = sql + " where category=? and priceKind=? and price between ? and ? and status=?" + limitSql;
 
-            pool.getConnection(function(err, conn){
-                if(err){return cb(err);}
+            pool.getConnection(function (err, conn) {
+                if (err) {
+                    return cb(err);
+                }
                 console.log(sql);
-                conn.query(sql,[paramCategory,parampriceKind,paramMinPrice,paramMaxPrice,paramStatus], function (err, results) {
+                conn.query(sql, [paramCategory, parampriceKind, paramMinPrice, paramMaxPrice, paramStatus], function (err, results) {
                         console.log('쿼리문 전송 성공, 검색어 제외 필터 검색');
-                        if (err) {return cb(err);}
+                        if (err) {
+                            return cb(err);
+                        }
                         conn.release();
                         return cb(null, {page: page, count: results.length, data: results});
                     }
+                );
+            });
+        } else if (!paramSearch && !paramCategory){
+            sql = sql + limitSql;
+            pool.getConnection(function (err, conn) {
+                if (err) {
+                    return cb(err);
+                }
 
+                conn.query(sql, function (err, results) {
+                        console.log('쿼리문 전송 성공, 전체 검색');
+                        if (err) {
+                            return cb(err);
+                        }
+                        conn.release();
+                        return cb(null, {page: page, count: results.length, data: results});
+                    }
                 );
             });
         }else{
@@ -99,6 +123,7 @@ Item.itemGetId = (req, cb)=>{
     });
 }
 
+
 Item.itemPost = (req, cb)=>{
     console.log('itemPost 메소드 호출됨');
     var paramUserId = req.body.user_id;
@@ -107,16 +132,18 @@ Item.itemPost = (req, cb)=>{
     var paramCategory = req.body.category;
     var paramArticle = req.body.article;
     var paramPriceKind = req.body.priceKind;
-    var paramPrice = parseInt(req.body.price);
-    var paramImageURL = req.body.imageURL;
+    var paramPrice = req.body.price;
     var paramSchoolLocation = req.body.location;
     var date = new Date();
 
     console.log(req.headers['content-type']);
     console.dir(req.files);
-    awsImageUpload.uploadMulti(req.files, (err, results)=>{
+
+    awsImageUpload.upload(req.files ,pool, (err, results)=>{
         if(err){console.log(err);}
         console.log(results);
+
+        var paramImageURL = 'd';
     });
 
     pool.getConnection(function(err, conn) {
@@ -150,7 +177,7 @@ Item.itemPut = (req, cb)=>{
         if(paramUserId == req.body.user_id){
             //임시_세션의 id와 일치여부 확인
             console.dir([paramTitle, paramCategory, paramArticle, date, paramSchoolLocation, paramitemId]);
-            conn.query("update item set title=?, category=?, article=?, writedate=?, location=?, where item_id=?",
+            conn.query("update item set title=?, category=?, article=?, writedate=?, location=? where item_id=?",
                 [paramTitle, paramCategory, paramArticle, date, paramSchoolLocation, paramitemId], function (error, results) {
                     console.log('쿼리문 전송 성공');
                     //And done with the connection.

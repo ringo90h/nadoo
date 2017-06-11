@@ -12,12 +12,12 @@ User.userGet = (req, cb) => {
 
     var row_count = 10;
     var offset = (page - 1)*row_count ;
-    var limitSql = ' order by need_id desc limit '+offset+','+row_count;
+    var limitSql = ' order by nickname desc limit '+offset+','+row_count;
 
     console.log('검색어 : '+paramSearch+"페이지"+page);
-    if(page){
+    if(page&&paramSearch){
         var sql = "select nickname, profile_thumbURL from user";
-        if(paramSearch&&paramCategory){paramSearch = " where nickname like '%"+paramSearch+"%'"; sql = sql.concat(paramSearch)+limitSql;}
+        paramSearch = " where nickname like '%"+paramSearch+"%'"; sql = sql.concat(paramSearch)+limitSql;
         console.log(sql);
 
         pool.getConnection(function(err, conn){
@@ -34,7 +34,7 @@ User.userGet = (req, cb) => {
         });
     }else{
         console.log('err : 필수 입력요소 누락');
-        return cb(null, {error:'page 정보 필수 입력'});
+        return cb(null, {error:'page, search 정보 필수 입력'});
     }
 
 }
