@@ -9,9 +9,10 @@ class awsImageUpload{
 
 awsImageUpload.upload = async (files ,pool, cb)=>{
     try {
-        let r1 = await awsImageUpload.uploadMulti(files, (err, resuslt)=>{
+        let r1 = await awsImageUpload.uploadMulti(files, (err, result)=>{
             if(err){return cb(err,null)}
-            console.log(result);
+            console.log('끝이보인다');
+            console.dir(result);
             return cb(null, result);
         });
         //result로 이미지 URL전달해줘야함
@@ -24,20 +25,21 @@ awsImageUpload.upload = async (files ,pool, cb)=>{
 awsImageUpload.uploadMulti = (fileInfo, callback)=> {
     console.log('uploadmulti 함수 실행 ');
     console.log('파일 [0] 경로:'+fileInfo[0].filename +'파일 [0] 타입 :' + fileInfo[0].mimetype);
-
     const files = [];
     for(var i=0;i<fileInfo.length;i++){
         files.push({filePath : fileInfo[i].filename, contentType : fileInfo[i].mimetype});
         var s3Param = {
             itemKey: 'image/' + fileInfo[i].filename,
-            thumbnailKey: 'thumbnail/' + fileInfo[i].filename
+            thumbnailKey: 'thumbnail/thumb' + fileInfo[i].filename
         };
         s3Util.uploadImage(fileInfo[i], s3Param, (err, result)=>{
             if(err){return err;}
-            console.log('성공');
+            console.log('성공공');
             console.dir(result);
+            callback(null, result);
         });
     }
+
 
 }
 

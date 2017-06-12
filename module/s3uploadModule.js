@@ -16,7 +16,7 @@ const s3 = new AWS.S3();
 const bucketName = config.bucketName;
 const thumbnailPath = './thumbnail/';
 
-function createThumbnail(imagePath, thumbnailPath) {
+function createThumbnail(imagePath, thumbnailPath, cb) {
     easyimg.rescrop({
         src:imagePath, dst:thumbnailPath,
         width:500, height:500,
@@ -25,6 +25,7 @@ function createThumbnail(imagePath, thumbnailPath) {
     }).then(
         function(image) {
             console.log('Resized and cropped: ' + image.width + ' x ' + image.height);
+            return cb(null, 'success');
         },
         function (err) {
             console.log(err);
@@ -49,7 +50,7 @@ AWS.S3.prototype.uploadFile = function (filePath, contentType, itemKey, callback
         // 접근 경로 - 2가지 방법
         var imageUrl = s3.endpoint.href + bucketName + '/' + itemKey; // http, https
         console.log(data);
-        callback(null, imageUrl);
+        return callback(null, imageUrl);
     });
 }
 
@@ -73,6 +74,8 @@ AWS.S3.prototype.uploadImage = function (fileInfo, uploadInfo, callback) {
     // 삭제할 파일 경로 저장
     var pathForDelete = [];
     var filePathOriginal = './model/image/'
+    var thumbnailPath = './model/'+uploadInfo.thumbnailKey;
+    var thumbnailUploadPath = 'model/'+uploadInfo.thumbnailKey;
     console.log('fileinfo.filePath : '+filePathOriginal);
 
     async.waterfall([
@@ -86,11 +89,10 @@ AWS.S3.prototype.uploadImage = function (fileInfo, uploadInfo, callback) {
                     return taskDone(err);
                 }
                 // 삭제할 이미지 경로 저장
-                pathForDelete.push(filePathOriginal);
+                pathForDelete.push(fileInfo.path);
                 console.log('이미지 업로드 성공:', result);
                 // 결과용 객체에 이미지 경로 저장
                 uploadResult.imageUrl = result;
-                //todo: DB result에 저장하기
                 taskDone(null);
             });
         },
@@ -103,10 +105,8 @@ AWS.S3.prototype.uploadImage = function (fileInfo, uploadInfo, callback) {
 
             // 썸네일 경로
             //변경할이미지, 올릴이미지
-            console.log('----------------')
-            console.dir(fileInfo);
-            console.dir(uploadInfo);
-            createThumbnail(uploadInfo.itemKey, uploadInfo.thumbnailKey, (err, result) => {
+            console.log(thumbnailPath);
+            createThumbnail(fileInfo.path, thumbnailPath, (err, result) => {
                 // 썸네일 생성 실패 - 원본 이미지 사용
                 if (err) {
                     console.log('thumbnail 생성 실패 :', err);
@@ -114,8 +114,15 @@ AWS.S3.prototype.uploadImage = function (fileInfo, uploadInfo, callback) {
                     return taskDone(null, false);
                 }
 
+                console.log('thumbnail 생성 성공 :', result);
                 // 썸네일 업로드
-                this.uploadFile(fileInfo.path, fileInfo.contentType, uploadInfo.thumbnailKey, (err, result) => {
+                    taskDone(null);
+                });
+
+        },
+        (taskDone) => {
+            // thumbnailKey 정보가 없으면 썸네일 생성/업로드 안함
+                this.uploadFile(thumbnailUploadPath, fileInfo.mimetype, uploadInfo.thumbnailKey, (err, result) => {
                     if (err) {
                         console.log('thumbanil 업로드 실패', err);
                         // 썸네일 업로드 실패하더라도 이미지 업로드를 중단하지 않는다. 원본 이미지를 썸네일로 사용.
@@ -124,20 +131,22 @@ AWS.S3.prototype.uploadImage = function (fileInfo, uploadInfo, callback) {
                     console.log('thumbnail 업로드 성공 :', result);
 
                     // 파일 삭제 태스크를 위한 경로 저장
-                    pathForDelete.push(fileInfo.path);
+                    pathForDelete.push(thumbnailUploadPath);
 
                     // 결과용 객체에 이미지 경로 저장
                     uploadResult.thumbnailUrl = result;
 
                     taskDone(null);
                 });
-            });
-        }/*,
-        // 파일 삭제
+        },
         (taskDone) => {
             try {
+                console.log('삭제목록');
+                console.dir(pathForDelete);
                 for(var i = 0 ; i < pathForDelete.length ; i++) {
                     const path = pathForDelete[i];
+                    console.log('삭제요청패스:')
+                    console.dir(path);
                     fs.unlinkSync(path);
                 }
                 console.log('파일 삭제 성공');
@@ -147,11 +156,13 @@ AWS.S3.prototype.uploadImage = function (fileInfo, uploadInfo, callback) {
             }
 
             taskDone(null);
-        }*/
+        }
     ], (err) => {
         if (err) {
             return callback(err);
         }
+        console.log('uploadResult:')
+        console.dir(uploadResult);
         callback(null, uploadResult);
     });
 }

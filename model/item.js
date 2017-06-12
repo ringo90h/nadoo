@@ -141,23 +141,26 @@ Item.itemPost = (req, cb)=>{
 
     awsImageUpload.upload(req.files ,pool, (err, results)=>{
         if(err){console.log(err);}
-        console.log(results);
+        console.log('Qyd');
+        console.dir(results);
+        var paramImageURL = JSON.stringify(results);
+        console.log('URL:'+paramImageURL);
 
-        var paramImageURL = 'd';
+        pool.getConnection(function(err, conn) {
+            if(err){return cb(err);}
+            //Use the connection
+            conn.query("insert into item values('',?,?,?,?,?,?,?,?,?,'3')",
+                [paramUserId, paramTitle, paramCategory, paramArticle, paramPriceKind, paramPrice, paramImageURL, date, paramSchoolLocation], function (error, results) {
+                    console.log('쿼리문 전송 성공');
+                    //And done with the connection.
+                    if (err) {return cb(err);}
+                    conn.release();
+                    return cb(null,{mag :'성공'});
+                });
+        });
     });
 
-    pool.getConnection(function(err, conn) {
-        if(err){return cb(err);}
-        //Use the connection
-        conn.query("insert into item values('',?,?,?,?,?,?,'image',?,?,'3')",
-            [paramUserId, paramTitle, paramCategory, paramArticle, paramPriceKind, paramPrice, date, paramSchoolLocation], function (error, results) {
-                console.log('쿼리문 전송 성공');
-                //And done with the connection.
-                if (err) {return cb(err);}
-                conn.release();
-                return cb(null,{mag :'성공'});
-            });
-    });
+
 }
 
 Item.itemPut = (req, cb)=>{

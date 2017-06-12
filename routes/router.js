@@ -39,6 +39,10 @@ router.route('/board').get(boardGet).post(boardPost);
 router.route('/board/:board_id').get(boardGetId).delete(boardDelete).post(boardPut);
 router.route('/user').get(userGet).post(userPost);
 router.route('/user/:user_id').get(userGetId).delete(userDelete).post(userPut);
+router.route('/login').post(loginPost);
+
+function loginPost(req, res, next){Index.loginPost(req,res,next);}
+
 
 function needGet(req, res, next){Index.needGet(req,res,next);}
 function needPost(req, res, next){Index.needPost(req,res,next);}
