@@ -63,6 +63,9 @@ app.use(expressSession({
 	}
 }));
 
+
+app.set('jwt-secret', config.secret);
+
 app.use(router);
 
 app.use( expressErrorHandler.httpError(404) );

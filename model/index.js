@@ -7,13 +7,13 @@ const Need = require('./need');
 const Item = require('./item');
 const Board = require('./board');
 const User = require('./user');
-const JWTAuth = require('./JWTAuth');
+const Auth = require('./auth.controller');
 
 class Index{
 }
 Index.loginPost = (req, res, next)=>{
     console.log('loginPost 라우팅');
-    User.loginPost(req,(err,result)=>{
+    Auth.register(req,(err,result)=>{
         if(err){return next(err);}
         res.send(result);
     });

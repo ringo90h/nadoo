@@ -6,6 +6,7 @@
  */
 
 module.exports = {
+    secret: 'SeCrEtKeYfOrHaShInG',
     port : '3306',
     host     : 'nadoodatabase.cahz3zhr1zdj.us-east-2.rds.amazonaws.com',
     user     : 'nadooroot',
