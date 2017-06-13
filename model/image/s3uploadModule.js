@@ -5,7 +5,7 @@ const fs = require('fs');
 const assert = require('assert');
 const easyimg = require('easyimage');
 
-const config = require('../config.js');
+const config = require('../../config.js');
 AWS.config.region = config.region;
 AWS.config.accessKeyId = config.accessKeyId;
 AWS.config.secretAccessKey = config.secretAccessKey;

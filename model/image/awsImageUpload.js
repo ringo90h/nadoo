@@ -1,5 +1,5 @@
 /*jshint esversion: 6 */
-const s3Util = require('../module/s3uploadModule');
+const s3Util = require('./s3uploadModule');
 const pathUtil = require('path');
 const async = require('async');
 // uploadSingle();

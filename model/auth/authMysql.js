@@ -3,7 +3,7 @@
  */
 /*jshint esversion: 6 */
 
-var pool = require('../database/dbConnect');
+var pool = require('../../database/dbConnect');
 class authMysql{
 }
 
