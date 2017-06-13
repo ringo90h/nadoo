@@ -32,7 +32,9 @@ const expressSession = require('express-session');
 
 const config = require('./config');
 const database = require('./database/database');
-const router = require('./routes/router');
+const item_router = require('./routes/item_router');
+const need_router = require('./routes/need_router');
+const board_router = require('./routes/board_router');
 
 const app = express();
 
@@ -66,7 +68,9 @@ app.use(expressSession({
 
 app.set('jwt-secret', config.secret);
 
-app.use(router);
+app.use(item_router);
+app.use(need_router);
+app.use(board_router);
 
 app.use( expressErrorHandler.httpError(404) );
 app.use( errorHandler );

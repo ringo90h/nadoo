@@ -120,6 +120,7 @@ Item.itemPost = (paramUserId, paramTitle, paramCategory, paramArticle, paramPric
 
     console.dir(files);
 
+
     awsImageUpload.upload(files ,pool, (err, results)=>{
         if(err){console.log(err);}
         console.log('Qyd');

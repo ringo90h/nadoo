@@ -8,7 +8,6 @@ class authMysql{
 }
 
 authMysql.findOneByUserId = function (user_id){
-
     let sql = 'select user_id from usertest where user_id=?'
     pool.getConnection(function (err, conn) {
         if (err) {
@@ -25,7 +24,6 @@ authMysql.findOneByUserId = function (user_id){
             }
         });
     });
-
 }
 
 authMysql.findOneByUserNickname = function (nickname){
