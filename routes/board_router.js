@@ -13,11 +13,14 @@ board_router.route('/board/:board_id').get(boardGetId).delete(boardDelete).post(
 
 function boardGet(req, res, next){
     console.log('boardget 메소드 호출됨');
-    let page = req.query.page;
+    let page = parseInt(req.query.page);
     let paramCategory = req.query.category;
 
     Board.boardGet(page,paramCategory, (err,result)=>{
-        if(err){console.log('게시판글 조회 중 에러 발생 : '+err);}
+        if(err){
+            console.log('게시판글 조회 중 에러 발생 : '+err);
+            return next(err);
+        }
         console.log('게시판글 조회 완료');
         res.json(result);
     });
@@ -25,16 +28,18 @@ function boardGet(req, res, next){
 
 function boardPost(req, res, next){
     console.log('boardPost 메소드 호출됨');
-    let paramUserId = req.body.user_id;
+    let paramUserId = parseInt(req.body.user_id);
     //세션에서 얻어오기
     let paramTitle = req.body.title;
     let paramCategory = req.body.category;
     let paramArticle = req.body.article;
-    let paramAnonymity = req.body.anonymity;
-    let date = new Date();
+    let paramAnonymity = parseInt(req.body.anonymity);
 
-    Board.boardPost(paramUserId, paramTitle, paramCategory, paramArticle, paramAnonymity, date, (err, result)=>{
-        if(err){console.log('게시판글 작성 중 에러 발생 : '+err);}
+    Board.boardPost(paramUserId, paramTitle, paramCategory, paramArticle, paramAnonymity, (err, result)=>{
+        if(err){
+            console.log('게시판글 작성 중 에러 발생 : '+err);
+            return next(err);
+        }
         console.log('게시판글 작성 완료');
         res.json(result);
     });
@@ -42,17 +47,19 @@ function boardPost(req, res, next){
 
 function boardPut(req, res, next){
     console.log('BoardPost 메소드 호출됨');
-    let paramUserId = req.body.user_id;
+    let paramUserId = parseInt(req.body.user_id);
     //세션에서 얻어오기
     let paramTitle = req.body.title;
     let paramCategory = req.body.category;
     let paramArticle = req.body.article;
-    let paramAnonymity = req.body.anonymity;
-    let paramBoardId = req.params.board_id;
-    let date = new Date();
+    let paramAnonymity = parseInt(req.body.anonymity);
+    let paramBoardId = parseInt(req.params.board_id);
 
-    Board.boardPut(paramUserId, paramTitle, paramCategory, paramArticle, paramAnonymity, paramBoardId, date, (err,result)=>{
-        if(err){console.log('게시판글 수정 중 에러 발생 : '+err);}
+    Board.boardPut(paramUserId, paramTitle, paramCategory, paramArticle, paramAnonymity, paramBoardId, (err,result)=>{
+        if(err){
+            console.log('게시판글 수정 중 에러 발생 : '+err);
+            return next(err);
+        }
         console.log('게시판글 수정 완료');
         res.json(result);
     });
@@ -60,17 +67,32 @@ function boardPut(req, res, next){
 
 function boardDelete(req, res, next){
     console.log('boardDelete 메소드 호출됨');
-    let paramUserId = req.body.user_id;
+    let paramUserId = parseInt(req.body.user_id);
     //세션에서 얻어오기
-    let paramBoardId = req.params.board_id;
+    let paramBoardId = parseInt(req.params.board_id);
 
     Board.boardDelete(paramUserId, paramBoardId, (err, result)=>{
-        if(err){console.log('게시판글 삭제 중 에러 발생 : '+err);}
+        if(err){
+            console.log('게시판글 삭제 중 에러 발생 : '+err);
+            return next(err);
+        }
         console.log('게시판글 삭제 완료');
         res.json(result);
     });
 }
 
-function boardGetId(req, res, next){}
+function boardGetId(req, res, next){
+    console.log('boardGetId 메소드 호출됨');
+    let paramBoardId = parseInt(req.params.board_id);
+
+    Board.boardGetId(paramBoardId, (err, result)=>{
+        if(err){
+            console.log('게시판글 상세 조회 중 에러 발생 : '+err);
+            return next(err);
+        }
+        console.log('게시판글 상세 조회 완료');
+        res.json(result);
+    });
+}
 
 module.exports = board_router;

@@ -33,18 +33,21 @@ item_router.route('/item/:item_id').get(itemGetId).delete(itemDelete).post(itemP
 function itemGet(req, res, next){
     console.log('itemget 메소드 호출됨');
 
-    let page = req.query.page;
+    let page = parseInt(req.query.page);
     let paramSearch = req.query.search;
 
     let paramCategory = req.query.category;
     let parampriceKind = req.query.priceKind;
     let paramMinPrice = parseInt(req.query.minPrice) || 0;
     let paramMaxPrice = parseInt(req.query.maxPrice);
-    let paramStatus = req.query.status;
+    let paramStatus = parseInt(req.query.status);
     let paramSort = req.query.sort;
 
     Item.itemGet(page, paramSearch, paramCategory, parampriceKind, paramMinPrice, paramMaxPrice, paramStatus, paramSort, (err, result)=>{
-        if(err){console.log('물품글 조회 중 에러 발생 : '+err);}
+        if(err){
+            console.log('물품글 조회 중 에러 발생 : '+err);
+            return next(err);
+        }
         console.log('물품글 조회 완료');
         res.json(result);
     });
@@ -52,56 +55,64 @@ function itemGet(req, res, next){
 
 function itemPost(req, res, next){
     console.log('itemPost 메소드 호출됨');
-    let paramUserId = req.body.user_id;
+    let paramUserId = parseInt(req.body.user_id);
     //세션에서 얻어오기
     let paramTitle = req.body.title;
     let paramCategory = req.body.category;
     let paramArticle = req.body.article;
     let paramPriceKind = req.body.priceKind;
-    let paramPrice = req.body.price;
+    let paramPrice = parseInt(req.body.price);
     let paramSchoolLocation = req.body.location;
-    let date = new Date();
-    let files = req.files || {};
+    let files = req.files || '';
 
-    Item.itemPost(paramUserId, paramTitle, paramCategory, paramArticle, paramPriceKind, paramPrice, paramSchoolLocation, date, files, (err,result)=>{
-        if(err){console.log('물품글 작성 중 에러 발생 : '+err);}
+    Item.itemPost(paramUserId, paramTitle, paramCategory, paramArticle, paramPriceKind, paramPrice, paramSchoolLocation,  files, (err,result)=>{
+        if(err){
+            console.log('물품글 작석 중 에러 발생 : '+err);
+            return next(err);
+        }
         console.log('물품글 작성 완료');
-        res.json(result);
-    });
-}
-
-function itemDelete(req, res, next){
-    console.log('itemDelete 메소드 호출됨');
-    let paramUserId = req.body.user_id;
-    //세션에서 얻어오기
-    let paramitemId = req.params.itemId;
-
-    Item.itemDelete(paramUserId, paramitemId, (err, result)=>{
-        if(err){console.log('물품글 삭제 중 에러 발생 : '+err);}
-        console.log('물품글 삭제 완료');
         res.json(result);
     });
 }
 
 function itemPut(req, res, next){
     console.log('itemPut 메소드 호출됨');
-    let paramUserId = req.body.user_id;
+    let paramUserId = parseInt(req.body.user_id);
     //세션에서 얻어오기
     let paramTitle = req.body.title;
     let paramCategory = req.body.category;
     let paramArticle = req.body.article;
     let paramSchoolLocation = req.body.location;
-    let paramitemId = req.params.itemId;
+    let paramitemId = parseInt(req.params.item_id);
     let paramPriceKind = req.body.priceKind;
-    let paramPrice = req.body.price;
-    let date = new Date();
+    let paramPrice = parseInt(req.body.price);
 
-    Item.itemPut(paramUserId, paramTitle, paramCategory, paramArticle, paramPriceKind, paramPrice, paramitemId, paramSchoolLocation, date, (err,result)=>{
-        if(err){console.log('물품글 수정 중 에러 발생 : '+err);}
+    Item.itemPut(paramUserId, paramTitle, paramCategory, paramArticle, paramPriceKind, paramPrice, paramitemId, paramSchoolLocation,  (err,result)=>{
+        if(err){
+            console.log('물품글 수정 중 에러 발생 : '+err);
+            return next(err);
+        }
         console.log('물품글 수정 완료');
         res.json(result);
     });
 }
+
+function itemDelete(req, res, next){
+    console.log('itemDelete 메소드 호출됨');
+    let paramUserId = parseInt(req.body.user_id);
+    //세션에서 얻어오기
+    let paramitemId = parseInt(req.params.item_id);
+
+    Item.itemDelete(paramUserId, paramitemId, (err, result)=>{
+        if(err){
+            console.log('물품글 삭제 중 에러 발생 : '+err);
+            return next(err);
+        }
+        console.log('물품글 삭제 완료');
+        res.json(result);
+    });
+}
+
 function itemGetId(req, res, next){Index.itemGetId(req,res,next);}
 
 module.exports = item_router;

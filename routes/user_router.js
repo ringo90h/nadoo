@@ -9,8 +9,6 @@
  */
 
 const express = require('express');
-const multer = require('multer');
-const pathUtil = require('path');
 
 const upload = multer({storage : storage});
 
@@ -22,12 +20,11 @@ router.route('/login').post(loginPost);
 
 function loginPost(req, res, next){Index.loginPost(req,res,next);}
 
-
-function userGet(req, res, next){Index.userGet(req,res,next);}
-function userPost(req, res, next){Index.userPost(req,res,next);}
-function userGetId(req, res, next){Index.userGetId(req,res,next);}
-function userDelete(req, res, next){Index.userDelete(req,res,next);}
-function userPut(req, res, next){Index.userPut(req,res,next);}
+function userGet(req, res, next){}
+function userPost(req, res, next){}
+function userGetId(req, res, next){}
+function userDelete(req, res, next){}
+function userPut(req, res, next){}
 
 
 module.exports = router;

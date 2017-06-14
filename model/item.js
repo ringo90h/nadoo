@@ -2,7 +2,7 @@
 /*jshint -W030 */
 
 let pool = require('../database/dbConnect');
-let awsImageUpload = require('./image/awsImageUpload');
+let awsImsgeUpload = require('./image/awsImageUpload');
 class Item{
 }
 
@@ -108,7 +108,7 @@ Item.itemGetId = (req, cb)=>{
                 console.log('쿼리문 전송 성공, 아이템 iD'+paramItemId+'상세 검색');
                 if (err) {return cb(err);}
                 conn.release();
-                return cb(null, {mag: "get_id success", data: results});
+                return cb(null, {msg: "get_id success", data: results});
             }
 
         );
@@ -116,28 +116,27 @@ Item.itemGetId = (req, cb)=>{
 }
 
 
-Item.itemPost = (paramUserId, paramTitle, paramCategory, paramArticle, paramPriceKind, paramPrice, paramSchoolLocation, date,files, cb)=>{
+Item.itemPost = (paramUserId, paramTitle, paramCategory, paramArticle, paramPriceKind, paramPrice, paramSchoolLocation, files, cb)=>{
 
     console.dir(files);
 
 
-    awsImageUpload.upload(files ,pool, (err, results)=>{
+    awsImsgeUpload.upload(files ,pool, (err, results)=>{
         if(err){console.log(err);}
-        console.log('Qyd');
         console.dir(results);
-        let paramImageURL = JSON.stringify(results);
-        console.log('URL:'+paramImageURL);
+        let paramImsgeURL = JSON.stringify(results);
+        console.log('URL:'+paramImsgeURL);
 
         pool.getConnection(function(err, conn) {
             if(err){return cb(err);}
             //Use the connection
-            conn.query("insert into item values('',?,?,?,?,?,?,?,?,?,'3')",
-                [paramUserId, paramTitle, paramCategory, paramArticle, paramPriceKind, paramPrice, paramImageURL, date, paramSchoolLocation], function (error, results) {
+            conn.query("insert into item values('',?,?,?,?,?,?,?,'',?,'3')",
+                [paramUserId, paramTitle, paramCategory, paramArticle, paramPriceKind, paramPrice, paramImsgeURL, paramSchoolLocation], function (error, results) {
                     console.log('쿼리문 전송 성공');
                     //And done with the connection.
                     if (err) {return cb(err);}
                     conn.release();
-                    return cb(null,{mag :'item post 성공'});
+                    return cb(null,{msg :'item post 성공'});
                 });
         });
     });
@@ -150,15 +149,15 @@ Item.itemPut = (paramUserId, paramTitle, paramCategory, paramArticle, paramPrice
         if(paramUserId){
             //임시_세션의 id와 일치여부 확인
             console.dir([paramTitle, paramCategory, paramArticle, date, paramSchoolLocation, paramitemId]);
-            conn.query("update item set title=?, category=?, article=?, writedate=?, location=? where item_id=?",
-                [paramTitle, paramCategory, paramArticle, date, paramSchoolLocation, paramitemId], function (error, results) {
+            conn.query("update item set title=?, category=?, article=?, writedate='', location=? where item_id=?",
+                [paramTitle, paramCategory, paramArticle, paramSchoolLocation, paramitemId], function (error, results) {
                     console.log('쿼리문 전송 성공');
                     //And done with the connection.
                     //Handle error after the release.
                     if (err) {return cb(err);}
                     // Don't use the connection here, it has been returned to the pool
                     conn.release();
-                    return cb(null, {mag : 'put success', match: results.message});
+                    return cb(null, {msg : 'put success', match: results.message});
                 });
         }else{
             //사용자 불일치
@@ -179,7 +178,7 @@ Item.itemDelete = (paramUserId, paramitemId, cb)=>{
                 //Handle error after the release.
                 if (err) {return cb(err);}
                 conn.release();
-                return cb(null, {mag : 'delete success', match: results.affectedRows});
+                return cb(null, {msg : 'delete success', match: results.affectedRows});
                 // Don't use the connection here, it has been returned to the pool
             });
         }else{

@@ -8,7 +8,7 @@ class authMysql{
 }
 
 authMysql.findOneByUserId = function (user_id){
-    let sql = 'select user_id from usertest where user_id=?'
+    let sql = 'select user_id from usertest where user_id=?';
     pool.getConnection(function (err, conn) {
         if (err) {
            console.log(err);
@@ -19,12 +19,27 @@ authMysql.findOneByUserId = function (user_id){
                 console.log(err);
             }
             conn.release();
-            if(results){
+            if(results.length == 0){
+                console.log('비어있다');
+
+                console.dir(results);
+            }else{
+                console.log('값이있따');
                 console.dir(results);
             }
         });
     });
 }
+
+
+
+
+
+
+
+
+
+
 
 authMysql.findOneByUserNickname = function (nickname){
     let sql = 'select user_key from usertest where nickname=?'

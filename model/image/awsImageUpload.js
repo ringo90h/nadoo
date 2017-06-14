@@ -6,23 +6,18 @@ const async = require('async');
 class awsImageUpload{
 }
 
-
-awsImageUpload.upload = async (files ,pool, cb)=>{
-    if(isNaN(files)){
-        try {
-            let r1 = await awsImageUpload.uploadMulti(files, (err, result)=>{
-                if(err){return cb(err,null)}
-                console.log('끝이보인다');
-                console.dir(result);
-                return cb(null, result);
-            });
-            //result로 이미지 URL전달해줘야함
-        } catch (error) {
-            console.log('Task Failure', error);
-            throw error;
-        }
-    }else{
+awsImageUpload.upload = (files ,pool, cb)=>{
+    console.log('upload 함수 실행 ');
+    console.dir(files);
+    if(files.length == 0) {
         return cb(null, {});
+    }else{
+            awsImageUpload.uploadMulti(files, (err, result)=>{
+            if(err){return cb(err,null)}
+            console.log('끝이보인다');
+            console.dir(result);
+            return cb(null, result);
+        });
     }
 }
 

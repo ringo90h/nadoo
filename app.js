@@ -31,12 +31,17 @@ const mongoose = require('mongoose');
 const expressSession = require('express-session');
 
 const config = require('./config');
+
+const authJwt = require('./model/auth/authJwtToken');
 const database = require('./database/database');
 const item_router = require('./routes/item_router');
 const need_router = require('./routes/need_router');
 const board_router = require('./routes/board_router');
-
+const user_router = require('./routes/board_router');
+const login_router = require('./routes/login_router');
 const app = express();
+
+app.use(passport.initialize());
 
 //===== 서버 변수 설정 및 static으로 public 폴더 설정  =====//
 console.log('config.server_port : %d', config.server_port);
@@ -55,6 +60,7 @@ app.use('/public', static(path.join(__dirname, 'public')));
 // cookie-parser 설정
 app.use(cookieParser());
 // 세션 설정
+
 app.use(expressSession({
 	key:'sid',
 	secret:'secret',
@@ -68,9 +74,13 @@ app.use(expressSession({
 
 app.set('jwt-secret', config.secret);
 
+app.use(authJwt);
+app.use(item_router);
 app.use(item_router);
 app.use(need_router);
 app.use(board_router);
+app.use(user_router);
+app.use(login_router);
 
 app.use( expressErrorHandler.httpError(404) );
 app.use( errorHandler );

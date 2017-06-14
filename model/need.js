@@ -27,37 +27,38 @@ Need.needGet = (page, paramSearch, paramCategory, limitSql, cb) => {
     }
 }
 
-Need.needPost = (paramUserId, paramTitle, paramCategory, paramArticle,paramSchoolLocation, date, cb)=>{
+Need.needPost = (paramUserId, paramTitle, paramCategory, paramArticle,paramSchoolLocation,  cb)=>{
     pool.getConnection(function(err, conn) {
         if(err){return cb(err);}
         //Use the connection
-        conn.query("insert into need values('',?,?,?,?,?,?)",
-            [paramUserId, paramTitle, paramCategory, paramArticle, date, paramSchoolLocation], function (error, results) {
+        conn.query("insert into need values('',?,?,?,?,'',?)",
+            [paramUserId, paramTitle, paramCategory, paramArticle,  paramSchoolLocation], function (error, results) {
             console.log('쿼리문 전송 성공');
             //And done with the connection.
             if (err) {return cb(err);}
             conn.release();
-            return cb(null,{mag :"post success", insertId: results.insertId, affectedRows: results.affectedRows});
+            return cb(null,{msg :"post success", insertId: results.insertId, affectedRows: results.affectedRows});
         });
     });
 }
 
-Need.needPut = (paramUserId, paramTitle, paramCategory, paramArticle,paramSchoolLocation, paramNeedId, date, cb)=>{
+Need.needPut = (paramUserId, paramTitle, paramCategory, paramArticle,paramSchoolLocation, paramNeedId,  cb)=>{
     pool.getConnection(function(err, conn) {
         if(err){return cb(err);}
         //Use the connection
         if(paramUserId){
             //임시_세션의 id와 일치여부 확인
             console.dir([paramTitle, paramCategory, paramArticle, date, paramSchoolLocation, paramNeedId]);
-            conn.query("update need set title=?, category=?, article=?, writedate=?, location=? where need_id=?",
-                [paramTitle, paramCategory, paramArticle, date, paramSchoolLocation, paramNeedId], function (error, results) {
+            conn.query("update need set title=?, category=?, article=?, writedate='', locatio" +
+                "n=? where need_id=?",
+                [paramTitle, paramCategory, date, paramSchoolLocation, paramNeedId], function (error, results) {
                 console.log('쿼리문 전송 성공');
                 //And done with the connection.
                 //Handle error after the release.
                 if (err) {return cb(err);}
                 // Don't use the connection here, it has been returned to the pool
                 conn.release();
-                return cb(null, {mag : 'put success', match: results.message});
+                return cb(null, {msg : 'put success', match: results.message});
             });
         }else{
             //사용자 불일치
@@ -78,7 +79,7 @@ Need.needDelete = (paramUserId, paramNeedId, cb)=>{
                 //Handle error after the release.
                 if (err) {return cb(err);}
                 conn.release();
-                return cb(null, {mag : 'delete success', deletedata: results.affectedRows});
+                return cb(null, {msg : 'delete success', deletedata: results.affectedRows});
                 // Don't use the connection here, it has been returned to the pool
             });
         }else{
