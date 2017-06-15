@@ -4,10 +4,11 @@
 
 const express = require('express');
 const Need = require('../model/need');
+const authJwt = require('../model/auth/authJwtToken');
 
 let need_router = express.Router();
 
-need_router.route('/need').get(needGet).post(needPost);
+need_router.route('/need').get(needGet).post(authJwt, needPost);
 need_router.route('/need/:need_id').delete(needDelete).post(needPut);
 
 function needGet(req, res, next){
@@ -34,7 +35,7 @@ function needGet(req, res, next){
 
 function needPost(req, res, next){
     console.log('needPost 메소드 호출됨');
-    let paramUserId = parseInt(req.body.user_id);
+    let paramUserId = req.user||null;
     //세션에서 얻어오기
     let paramTitle = req.body.title;
     let paramCategory = req.body.category;
@@ -53,7 +54,7 @@ function needPost(req, res, next){
 
 function needPut(req, res, next){
     console.log('needPut 메소드 호출됨');
-    let paramUserId = parseInt(req.body.user_id);
+    let paramUserId = req.user||null;
     //로그인한 상태에서 세션에서 얻어오기
     let paramTitle = req.body.title;
     let paramCategory = req.body.category;
@@ -66,14 +67,13 @@ function needPut(req, res, next){
             console.log('요청글 수정 중 에러 발생 : '+err);
             return next(err);
         }
-        console.log('요청글 수정 완료');
         res.json(result);
     });
 }
 
 function needDelete(req, res, next){
     console.log('needDelete 메소드 호출됨');
-    let paramUserId = parseInt(req.body.user_id);
+    let paramUserId = req.user||null;
     //세션에서 얻어오기
     let paramNeedId = parseInt(req.params.need_id);
 

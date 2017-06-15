@@ -32,7 +32,6 @@ const expressSession = require('express-session');
 
 const config = require('./config');
 
-const authJwt = require('./model/auth/authJwtToken');
 const database = require('./database/database');
 const item_router = require('./routes/item_router');
 const need_router = require('./routes/need_router');
@@ -41,41 +40,31 @@ const user_router = require('./routes/board_router');
 const login_router = require('./routes/login_router');
 const app = express();
 
-app.use(passport.initialize());
-
 //===== 서버 변수 설정 및 static으로 public 폴더 설정  =====//
 console.log('config.server_port : %d', config.server_port);
 app.set('port', process.env.PORT || 3000);
- 
 
+
+// public 폴더를 static으로 오픈
+app.use('/public', static(path.join(__dirname, 'public')));
+// cookie-parser 설정
+app.use(cookieParser());
 // body-parser를 이용해 application/x-www-form-urlencoded 파싱
 app.use(bodyParser.urlencoded({ extended: false }));
 
 // body-parser를 이용해 application/json 파싱
 app.use(bodyParser.json());
 
-// public 폴더를 static으로 오픈
-app.use('/public', static(path.join(__dirname, 'public')));
- 
-// cookie-parser 설정
-app.use(cookieParser());
-// 세션 설정
 
 app.use(expressSession({
-	key:'sid',
-	secret:'secret',
-	resave:true,
-	saveUninitialized:true,
-	cookie:{
-		maxAge: 1000*60*60
-	}
+	secret:'secret'
 }));
-
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.set('jwt-secret', config.secret);
 
-app.use(authJwt);
-app.use(item_router);
+
 app.use(item_router);
 app.use(need_router);
 app.use(board_router);

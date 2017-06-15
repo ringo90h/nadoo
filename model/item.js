@@ -31,7 +31,7 @@ Item.itemGet = (page, paramSearch, paramCategory, parampriceKind, paramMinPrice,
                             return cb(err);
                         }
                         conn.release();
-                        return cb(null, {page: page, count: results.length, data: results});
+                        return cb(null, {page: page, count: results.length, data: results,thumbnailURL: results.thumbnailUrl});
                     }
                 );
             });
@@ -50,7 +50,7 @@ Item.itemGet = (page, paramSearch, paramCategory, parampriceKind, paramMinPrice,
                             return cb(err);
                         }
                         conn.release();
-                        return cb(null, {page: page, count: results.length, data: results});
+                        return cb(null, {page: page, count: results.length, data: results, thumbnailURL: results.thumbnailUrl});
                     }
                 );
             });
@@ -67,7 +67,7 @@ Item.itemGet = (page, paramSearch, paramCategory, parampriceKind, paramMinPrice,
                             return cb(err);
                         }
                         conn.release();
-                        return cb(null, {page: page, count: results.length, data: results});
+                        return cb(null, {page: page, count: results.length, data: results, thumbnailURL: results.imageURL});
                     }
                 );
             });
@@ -86,7 +86,7 @@ Item.itemGet = (page, paramSearch, paramCategory, parampriceKind, paramMinPrice,
                             return cb(err);
                         }
                         conn.release();
-                        return cb(null, {page: page, count: results.length, data: results});
+                        return cb(null, {page: page, count: results.length, data: results, thumbnailURL: results.thumbnailUrl});
                     }
                 );
             });
@@ -117,73 +117,115 @@ Item.itemGetId = (req, cb)=>{
 
 
 Item.itemPost = (paramUserId, paramTitle, paramCategory, paramArticle, paramPriceKind, paramPrice, paramSchoolLocation, files, cb)=>{
-
     console.dir(files);
+    if(paramTitle&&paramCategory&&paramArticle&&paramPriceKind&&paramSchoolLocation){
+        if(paramUserId){
+            let paramImageURL = {};
+            awsImsgeUpload.upload(files, (err, results)=>{
+                if(err){console.log(err);}
+                console.log('URL:'+paramImageURL);
+                paramImageURL.push(JSON.stringify(results));
 
-
-    awsImsgeUpload.upload(files ,pool, (err, results)=>{
-        if(err){console.log(err);}
-        console.dir(results);
-        let paramImsgeURL = JSON.stringify(results);
-        console.log('URL:'+paramImsgeURL);
-
-        pool.getConnection(function(err, conn) {
-            if(err){return cb(err);}
-            //Use the connection
-            conn.query("insert into item values('',?,?,?,?,?,?,?,'',?,'3')",
-                [paramUserId, paramTitle, paramCategory, paramArticle, paramPriceKind, paramPrice, paramImsgeURL, paramSchoolLocation], function (error, results) {
-                    console.log('쿼리문 전송 성공');
-                    //And done with the connection.
-                    if (err) {return cb(err);}
-                    conn.release();
-                    return cb(null,{msg :'item post 성공'});
+                pool.getConnection(function(err, conn) {
+                    if(err){return cb(err);}
+                    //Use the connection
+                    conn.query("insert into item values('',?,?,?,?,?,?,?,'',?,'3')",
+                        [paramUserId, paramTitle, paramCategory, paramArticle, paramPriceKind, paramPrice, paramImageURL, paramSchoolLocation], function (error, results) {
+                            console.log('쿼리문 전송 성공');
+                            //And done with the connection.
+                            if (err) {return cb(err);}
+                            conn.release();
+                            return cb(null,{msg :'item post 성공'});
+                            //todo db입력 실패시 이미지 삭제 or 쿼리 전솧 후 이미지 업로드
+                        });
                 });
-        });
-    });
+            });
+        }else{
+            return cb(null,{err:"1", msg:"not login"});
+            //todo 이미지 삭제
+        }
+    }else{
+        console.log('필수 입력요소 누락');
+        return cb(null, {error:'필수 입력요소 누락'});
+    }
 }
 
-Item.itemPut = (paramUserId, paramTitle, paramCategory, paramArticle, paramPriceKind, paramPrice, paramitemId, paramSchoolLocation, date, cb)=>{
-    pool.getConnection(function(err, conn) {
-        if(err){return cb(err);}
-        //Use the connection
-        if(paramUserId){
-            //임시_세션의 id와 일치여부 확인
-            console.dir([paramTitle, paramCategory, paramArticle, date, paramSchoolLocation, paramitemId]);
-            conn.query("update item set title=?, category=?, article=?, writedate='', location=? where item_id=?",
-                [paramTitle, paramCategory, paramArticle, paramSchoolLocation, paramitemId], function (error, results) {
-                    console.log('쿼리문 전송 성공');
-                    //And done with the connection.
-                    //Handle error after the release.
-                    if (err) {return cb(err);}
-                    // Don't use the connection here, it has been returned to the pool
-                    conn.release();
-                    return cb(null, {msg : 'put success', match: results.message});
-                });
-        }else{
-            //사용자 불일치
-        }
+Item.itemPut = (paramUserId, paramTitle, paramCategory, paramArticle, paramPriceKind, paramPrice, paramitemId, paramSchoolLocation, files, cb)=>{
+    if(paramTitle&&paramCategory&&paramArticle&&paramPriceKind&&paramSchoolLocation) {
+        pool.getConnection(function (err, conn) {
+            if (err) {
+                return cb(err);
+            }
+            conn.query("select user_id from item where item_id=?",
+                [paramitemId], function(err, results){
+                console.log('쿼리문 전송 성공, ID 매칭 시작');
+                if(err){
+                    return cb(err)
+                }
+                let paramImageURL;
+                let date = new Date();
+                if(results[0].user_id==paramUserId){
+                    console.log('사용자 일치');
+                    awsImsgeUpload.upload(files, (err, results)=>{
+                        if(err){console.log(err);}
 
-    });
+                        paramImageURL = JSON.stringify(results);
+                        console.log('URL:'+paramImageURL);
+
+                        conn.query("update item set title=?, category=?, article=?, priceKind=?, price=?, imageURL=?, writedate=?, location=? where item_id=?",
+                            [paramTitle, paramCategory, paramArticle, paramPriceKind, paramPrice, paramImageURL, date, paramSchoolLocation, paramitemId], function (err, results) {
+                                console.log('쿼리문 전송 성공');
+                                //And done with the connection.
+                                //Handle error after the release.
+                                if (err) {
+                                    return cb(err);
+                                }
+                                // Don't use the connection here, it has been returned to the pool
+                                conn.release();
+                                console.dir(results);
+                                return cb(null, {msg: 'put success'});
+                            });
+                    });
+                }else{
+                    conn.release();
+                    console.log('사용자 불일치');
+                    return cb(null, {err: '1', msg: 'user_id is not correct'});
+                }
+            });
+        });
+    }else{
+        console.log('필수 입력요소 누락');
+        return cb(err);
+    }
 }
 
 Item.itemDelete = (paramUserId, paramitemId, cb)=>{
     pool.getConnection(function(err, conn) {
         if(err){return cb(err);}
         //Use the connection
-        if(paramUserId){
-            //임시_세션의 id와 글의 id 일치여부 확인
-            conn.query("delete from item where item_id=?",[paramitemId], function (error, results) {
-                console.log('쿼리문 전송 성공');
-                //And done with the connection.
-                //Handle error after the release.
-                if (err) {return cb(err);}
-                conn.release();
-                return cb(null, {msg : 'delete success', match: results.affectedRows});
-                // Don't use the connection here, it has been returned to the pool
+        conn.query("select user_id from item where item_id=?",
+            [paramitemId], function(err, results){
+                console.log('쿼리문 전송 성공, ID 매칭 시작');
+                if(err){
+                    return  cb(err);
+                }
+                if(results[0].user_id==paramUserId) {
+                    console.log('사용자 일치');
+                    conn.query("delete from item where item_id=?",[paramitemId], function (error, results) {
+                        console.log('쿼리문 전송 성공');
+                        //And done with the connection.
+                        //Handle error after the release.
+                        if (err) {return cb(err);}
+                        conn.release();
+                        return cb(null, {msg : 'delete success', match: results.affectedRows});
+                        // Don't use the connection here, it has been returned to the pool
+                    });
+                }else{
+                    conn.release();
+                    console.log('사용자 불일치');
+                    return cb(null, {err: '1', msg: 'user_id is not correct'});
+                }
             });
-        }else{
-            //사용자 불일치
-        }
     });
 }
 

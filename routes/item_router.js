@@ -7,6 +7,7 @@ const express = require('express');
 const Item = require('../model/item');
 const multer = require('multer');
 const pathUtil = require('path');
+const authJwt = require('../model/auth/authJwtToken');
 
 let storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -26,8 +27,8 @@ const upload = multer({storage : storage});
 
 let item_router = express.Router();
 
-item_router.route('/item').get(itemGet).post(upload.array('image'),itemPost);
-item_router.route('/item/:item_id').get(itemGetId).delete(itemDelete).post(itemPut);
+item_router.route('/item').get(itemGet).post(upload.array('image'),authJwt,itemPost);
+item_router.route('/item/:item_id').delete(authJwt,itemDelete).post(upload.array('image'),authJwt,itemPut);
 
 
 function itemGet(req, res, next){
@@ -55,7 +56,7 @@ function itemGet(req, res, next){
 
 function itemPost(req, res, next){
     console.log('itemPost 메소드 호출됨');
-    let paramUserId = parseInt(req.body.user_id);
+    let paramUserId = req.user||null;
     //세션에서 얻어오기
     let paramTitle = req.body.title;
     let paramCategory = req.body.category;
@@ -67,7 +68,7 @@ function itemPost(req, res, next){
 
     Item.itemPost(paramUserId, paramTitle, paramCategory, paramArticle, paramPriceKind, paramPrice, paramSchoolLocation,  files, (err,result)=>{
         if(err){
-            console.log('물품글 작석 중 에러 발생 : '+err);
+            console.log('물품글 작성 중 에러 발생 : '+err);
             return next(err);
         }
         console.log('물품글 작성 완료');
@@ -77,7 +78,7 @@ function itemPost(req, res, next){
 
 function itemPut(req, res, next){
     console.log('itemPut 메소드 호출됨');
-    let paramUserId = parseInt(req.body.user_id);
+    let paramUserId = req.user;
     //세션에서 얻어오기
     let paramTitle = req.body.title;
     let paramCategory = req.body.category;
@@ -86,8 +87,9 @@ function itemPut(req, res, next){
     let paramitemId = parseInt(req.params.item_id);
     let paramPriceKind = req.body.priceKind;
     let paramPrice = parseInt(req.body.price);
+    let files = req.files || '';
 
-    Item.itemPut(paramUserId, paramTitle, paramCategory, paramArticle, paramPriceKind, paramPrice, paramitemId, paramSchoolLocation,  (err,result)=>{
+    Item.itemPut(paramUserId, paramTitle, paramCategory, paramArticle, paramPriceKind, paramPrice, paramitemId, paramSchoolLocation, files,  (err,result)=>{
         if(err){
             console.log('물품글 수정 중 에러 발생 : '+err);
             return next(err);
@@ -99,7 +101,7 @@ function itemPut(req, res, next){
 
 function itemDelete(req, res, next){
     console.log('itemDelete 메소드 호출됨');
-    let paramUserId = parseInt(req.body.user_id);
+    let paramUserId = req.user;
     //세션에서 얻어오기
     let paramitemId = parseInt(req.params.item_id);
 
@@ -108,11 +110,10 @@ function itemDelete(req, res, next){
             console.log('물품글 삭제 중 에러 발생 : '+err);
             return next(err);
         }
-        console.log('물품글 삭제 완료');
         res.json(result);
     });
+    //todo 삭제시 S3의 이미지 함께 삭제
 }
 
-function itemGetId(req, res, next){Index.itemGetId(req,res,next);}
 
 module.exports = item_router;

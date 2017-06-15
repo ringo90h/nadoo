@@ -4,7 +4,7 @@
 /*jshint esversion: 6 */
 
 const pool = require('../database/dbConnect');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const saltRounds = 10;
 const myPlaintextPassword = '비밀번호';
 
@@ -12,7 +12,7 @@ class Login{
 }
 
 Login.userLogin = function (paramUserId, paramPassword, cb){
-    let sql = 'select user_id,password,nickname from user where user_id=?'
+    let sql = 'select user_id,password,nickname,user_key from user where user_id=?'
     console.log('loginIdPassword 메소드 실행');
 
     // Load hash from your password DB.
@@ -36,10 +36,8 @@ Login.userLogin = function (paramUserId, paramPassword, cb){
 
                 bcrypt.compare(paramPassword, results[0].password, function(err, res) {
                     if(res) {
-                        console.log('일치');
-                        console.log(res);
                         console.log('비밀번호 일치, 토큰 생성');
-                        return cb(null, {msg: 'match success', user_id:results[0].user_id, nickname:results[0].nickname});
+                        return cb(null, {msg: 'match success', user_id:results[0].user_id, user_key:results[0].user_key});
                         // Passwords match
                     } else {
                         console.log('비밀번호 불일치');

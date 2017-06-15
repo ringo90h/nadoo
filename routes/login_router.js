@@ -10,6 +10,7 @@
 
 const express = require('express');
 const Login = require('../model/login');
+const authJwt = require('../model/auth/authJwtToken');
 
 const jwt = require('jsonwebtoken');
 const passport = require('passport');
@@ -54,18 +55,21 @@ login_router.route('/join').post(userJoin);
 //login_router.route('/login/:need_id').delete(needDelete).post(needPut);
 
 function userLogin(req, res, next) {
+    console.log('userLogin함수 호출');
     let paramUserId = req.body.user_id;
     let paramPassword = req.body.password;
+    console.dir(paramUserId);
+    console.dir(paramPassword);
 
     Login.userLogin(paramUserId, paramPassword, (err, result)=>{
         if(err){
             console.log(err);
             res.send(err);
-            return next(err);
+            return err;
         }
         const payload = {
             id: result.user_id,
-            nickname:result.nickname
+            key: result.user_key
         };
         const option = {
             expiresIn: '1 year'
@@ -79,6 +83,7 @@ function userLogin(req, res, next) {
 }
 
 function userJoinUserIdCheck(req, res, next){
+    console.log('joinidcheck 메소드 출력');
     let paramUserId = req.body.user_id;
 
     Login.userJoinUserIdCheck(paramUserId, (err, result)=>{
@@ -111,9 +116,8 @@ function userJoin(req, res, next) {
     let paramPassword = req.body.password;
     let paramNickname = req.body.nickname;
     let paramSchool = req.body.school;
-    let paramUserstat = req.body.user_stat;
+    let paramUserstat = parseInt(req.body.user_stat);
     let paramUserSchoolEmail = req.body.school_email || '';
-
     Login.userJoin(paramUserId, paramPassword, paramNickname, paramSchool, paramUserstat, paramUserSchoolEmail, (err, result)=>{
         if(err){
             res.end(err);

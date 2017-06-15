@@ -6,7 +6,7 @@ const async = require('async');
 class awsImageUpload{
 }
 
-awsImageUpload.upload = (files ,pool, cb)=>{
+awsImageUpload.upload = (files, cb)=>{
     console.log('upload 함수 실행 ');
     console.dir(files);
     if(files.length == 0) {
