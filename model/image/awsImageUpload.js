@@ -1,47 +1,45 @@
 /*jshint esversion: 6 */
-const s3Util = require('../module/s3uploadModule');
+const s3Util = require('./s3uploadModule');
 const pathUtil = require('path');
 const async = require('async');
 // uploadSingle();
 class awsImageUpload{
 }
 
+awsImageUpload.upload = (files, cb)=>{
+    console.log('upload 함수 실행 ');
+    console.dir(files);
+    if(files.length == 0) {
+        return cb(null, {});
+    }else{
+            awsImageUpload.uploadMulti(files, (err, result)=>{
+            if(err){return cb(err,null)}
+            console.log('끝이보인다');
+            console.dir(result);
+            return cb(null, result);
+        });
+    }
+}
+
 awsImageUpload.uploadMulti = (fileInfo, callback)=> {
     console.log('uploadmulti 함수 실행 ');
-
     console.log('파일 [0] 경로:'+fileInfo[0].filename +'파일 [0] 타입 :' + fileInfo[0].mimetype);
-
     const files = [];
     for(var i=0;i<fileInfo.length;i++){
         files.push({filePath : fileInfo[i].filename, contentType : fileInfo[i].mimetype});
-    }
-    console.log('파일정보 : ');
-    console.dir(files);
-
-    async.map(files, (file, callback) => {
-        const itemKey = file.filePath;
-        const s3param = {
-            itemKey : './model/image/' + itemKey,
-            thumbnailKey : './model/thumbnail/' + itemKey
+        var s3Param = {
+            itemKey: 'image/' + fileInfo[i].filename,
+            thumbnailKey: 'thumbnail/thumb' + fileInfo[i].filename
         };
-
-        s3Util.uploadImage(file, s3param, (err, result) => {
-            if ( err ) {
-                return callback(err);
-            }
-            console.log('이미지 로컬 스토리지 업로드');
+        s3Util.uploadImage(fileInfo[i], s3Param, (err, result)=>{
+            if(err){return err;}
+            console.log('성공공');
+            console.dir(result);
             callback(null, result);
         });
+    }
 
 
-    }, (err, results) => {
-        if ( err ) {
-            console.log('Multifile image error:', err);
-        }
-        else {
-            console.log('Multifile image success :', results);
-        }
-    });
 }
 
 module.exports = awsImageUpload;

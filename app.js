@@ -11,67 +11,65 @@
  
 
 // Express 기본 모듈 불러오기
-var express = require('express')
+const express = require('express')
   , http = require('http')
   , path = require('path');
 
 // Express의 미들웨어 불러오기
-var bodyParser = require('body-parser')
+const bodyParser = require('body-parser')
   , cookieParser = require('cookie-parser')
   , static = require('serve-static')
   , errorHandler = require('errorhandler');
-
+const passport = require('passport');
 // 에러 핸들러 모듈 사용
-var expressErrorHandler = require('express-error-handler');
+const expressErrorHandler = require('express-error-handler');
 
 //mongoose 모듈 사용
-var mongoose = require('mongoose');
+const mongoose = require('mongoose');
 
 // Session 미들웨어 불러오기
-var expressSession = require('express-session');
+const expressSession = require('express-session');
 
-var config = require('./config');
-var database = require('./database/database');
-var router = require('./routes/router');
+const config = require('./config');
 
-var app = express();
-
+const database = require('./database/database');
+const item_router = require('./routes/item_router');
+const need_router = require('./routes/need_router');
+const board_router = require('./routes/board_router');
+const user_router = require('./routes/board_router');
+const login_router = require('./routes/login_router');
+const app = express();
 
 //===== 서버 변수 설정 및 static으로 public 폴더 설정  =====//
 console.log('config.server_port : %d', config.server_port);
 app.set('port', process.env.PORT || 3000);
- 
 
+
+// public 폴더를 static으로 오픈
+app.use('/public', static(path.join(__dirname, 'public')));
+// cookie-parser 설정
+app.use(cookieParser());
 // body-parser를 이용해 application/x-www-form-urlencoded 파싱
 app.use(bodyParser.urlencoded({ extended: false }));
 
 // body-parser를 이용해 application/json 파싱
 app.use(bodyParser.json());
 
-// public 폴더를 static으로 오픈
-app.use('/public', static(path.join(__dirname, 'public')));
- 
-// cookie-parser 설정
-app.use(cookieParser());
 
-// 세션 설정
 app.use(expressSession({
-	secret:'my key',
-	resave:true,
-	saveUninitialized:true
+	secret:'secret'
 }));
+app.use(passport.initialize());
+app.use(passport.session());
 
-app.use(router);
+app.set('jwt-secret', config.secret);
 
 
-
-
-//===== 404 에러 페이지 처리 =====//
-var errorHandler = expressErrorHandler({
- static: {
-   '404': './public/404.html'
- }
-});
+app.use(item_router);
+app.use(need_router);
+app.use(board_router);
+app.use(user_router);
+app.use(login_router);
 
 app.use( expressErrorHandler.httpError(404) );
 app.use( errorHandler );
@@ -104,7 +102,7 @@ app.use(function(err, req, res, next){
 });
 
 // 시작된 서버 객체를 리턴받도록 합니다. // Express 서버 시작
-var server = http.createServer(app).listen(app.get('port'), function(){
+const server = http.createServer(app).listen(app.get('port'), function(){
 	console.log('서버가 시작되었습니다. 포트 : ' + app.get('port'));
 
     // 데이터베이스 초기화
